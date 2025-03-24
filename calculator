@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Calculator with Parentheses</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+            margin: 0;
+        }
+        .calculator {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 500px; /* Increased width for more buttons */
+        }
+        .display {
+            width: 100%;
+            height: 50px;
+            font-size: 24px;
+            text-align: right;
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .content {
+            display: grid;
+            grid-template-columns: 3fr 1fr; /* 3 parts for buttons, 1 part for the image */
+            gap: 20px; /* Space between buttons and image */
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(6, 60px); /* Adjusted for extra buttons */
+            gap: 10px;
+        }
+        .button {
+            width: 60px;
+            height: 60px;
+            font-size: 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #d0d0d0;
+        }
+        .button.operator {
+            background-color: #ff9500;
+            color: white;
+        }
+        .button.operator:hover {
+            background-color: #e08900;
+        }
+        .button.clear {
+            background-color: #ff3b30;
+            color: white;
+        }
+        .button.clear:hover {
+            background-color: #e03328;
+        }
+        .image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .image-container img {
+            max-width: 100%; /* Ensures the image fits within the container */
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <!-- Display -->
+        <input type="text" class="display" id="display" disabled>
+
+        <!-- Content Section -->
+        <div class="content">
+            <!-- Buttons -->
+            <div class="buttons">
+                <!-- Row 1 -->
+                <button class="button clear" onclick="clearDisplay()">Clear</button>
+                <button class="button" onclick="backspace()">←</button>
+                <button class="button operator" onclick="appendOperator('(')">(</button>
+                <button class="button operator" onclick="appendOperator(')')">)</button>
+                <button class="button operator" onclick="enqueueOperation('%')">%</button>
+                <button class="button operator" onclick="enqueueOperation('/')">÷</button>
+
+                <!-- Row 2 -->
+                <button class="button" onclick="appendNumber('7')">7</button>
+                <button class="button" onclick="appendNumber('8')">8</button>
+                <button class="button" onclick="appendNumber('9')">9</button>
+                <button class="button operator" onclick="enqueueOperation('*')">×</button>
+                <button class="button operator" onclick="enqueueOperation('sqrt')">√</button>
+                <button class="button operator" onclick="enqueueOperation('square')">x²</button>
+
+                <!-- Row 3 -->
+                <button class="button" onclick="appendNumber('4')">4</button>
+                <button class="button" onclick="appendNumber('5')">5</button>
+                <button class="button" onclick="appendNumber('6')">6</button>
+                <button class="button operator" onclick="enqueueOperation('-')">−</button>
+                <button class="button operator" onclick="enqueueExponent()">xⁿ</button>
+                <button class="button operator" onclick="enqueueOperation('sin')">sin</button>
+
+                <!-- Row 4 -->
+                <button class="button" onclick="appendNumber('1')">1</button>
+                <button class="button" onclick="appendNumber('2')">2</button>
+                <button class="button" onclick="appendNumber('3')">3</button>
+                <button class="button operator" onclick="enqueueOperation('+')">+</button>
+                <button class="button operator" onclick="enqueueOperation('cos')">cos</button>
+                <button class="button operator" onclick="enqueueOperation('tan')">tan</button>
+
+                <!-- Row 5 -->
+                <button class="button" onclick="appendNumber('0')" style="grid-column: span 2;">0</button>
+                <button class="button" onclick="appendNumber('.')">.</button>
+                <button class="button" onclick="calculateResult()">=</button>
+                <button class="button operator" onclick="enqueueOperation('log')">log</button>
+                <button class="button operator" onclick="enqueueOperation('ln')">ln</button>
+
+                <!-- Row 6 -->
+                <button class="button operator" onclick="startChallenge()">Challenge</button>
+            </div>
+
+            <!-- Image Section -->
+            <div class="image-container">
+                <img src="https://www.boredpanda.com/blog/wp-content/uploads/2023/06/funny-witty-math-memes-78-648ab529bba2e__700.jpg" alt="Embedded Image">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let expression = ''; // Stores the full mathematical expression
+
+        function appendNumber(number) {
+            if (number === '.' && expression.includes('.')) return;
+            expression += number;
+            updateDisplay();
+        }
+
+        function appendOperator(operator) {
+            expression += operator;
+            updateDisplay();
+        }
+
+        function enqueueOperation(op) {
+            switch (op) {
+                case 'sqrt':
+                    expression = `Math.sqrt(${expression})`;
+                    break;
+                case 'square':
+                    expression = `(${expression})**2`;
+                    break;
+                case 'exponent':
+                    const exponent = parseFloat(prompt("Enter the exponent:"));
+                    if (isNaN(exponent)) return;
+                    expression = `(${expression})**${exponent}`;
+                    break;
+                case 'sin':
+                    expression = `Math.sin(${expression} * Math.PI / 180)`;
+                    break;
+                case 'cos':
+                    expression = `Math.cos(${expression} * Math.PI / 180)`;
+                    break;
+                case 'tan':
+                    expression = `Math.tan(${expression} * Math.PI / 180)`;
+                    break;
+                case 'log':
+                    expression = `Math.log10(${expression})`;
+                    break;
+                case 'ln':
+                    expression = `Math.log(${expression})`;
+                    break;
+                default:
+                    expression += op;
+                    break;
+            }
+            updateDisplay();
+        }
+
+        function calculateResult() {
+            try {
+                // Replace symbols with JavaScript equivalents
+                let evalExpression = expression
+                    .replace(/÷/g, '/')
+                    .replace(/×/g, '*')
+                    .replace(/−/g, '-')
+                    .replace(/%/g, '/100');
+
+                // Evaluate the expression
+                const result = eval(evalExpression);
+
+                // Update the display with the result
+                expression = result.toString();
+                updateDisplay();
+            } catch (error) {
+                expression = 'Error';
+                updateDisplay();
+            }
+        }
+
+        function clearDisplay() {
+            expression = '';
+            updateDisplay();
+        }
+
+        function backspace() {
+            expression = expression.slice(0, -1);
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('display').value = expression || '0';
+        }
+
+        // Challenge Mode Functionality
+        function startChallenge() {
+            // Generate two random numbers and a random operator
+            const num1 = Math.floor(Math.random() * 10) + 1; // Random number between 1 and 10
+            const num2 = Math.floor(Math.random() * 10) + 1; // Random number between 1 and 10
+            const operators = ['+', '-', '*', '/'];
+            const operator = operators[Math.floor(Math.random() * operators.length)];
+
+            // Avoid division by zero
+            if (operator === '/' && num2 === 0) {
+                num2 = 1;
+            }
+
+            // Calculate the result
+            let result;
+            switch (operator) {
+                case '+':
+                    result = num1 + num2;
+                    break;
+                case '-':
+                    result = num1 - num2;
+                    break;
+                case '*':
+                    result = num1 * num2;
+                    break;
+                case '/':
+                    result = num1 / num2;
+                    break;
+                default:
+                    break;
+            }
+
+            // Display the challenge
+            const challengeText = `${num1} ${operator} ${num2} = ?`;
+            alert(`Solve this challenge:\n${challengeText}`);
+
+            // Prompt the user for their guess
+            const userAnswer = parseFloat(prompt("Enter your answer:"));
+
+            // Check the user's answer
+            if (userAnswer === result) {
+                alert("Correct! Great job!");
+            } else {
+                alert(`Incorrect! The correct answer was ${result}. Try again!`);
+            }
+        }
+    </script>
+</body>
+</html>
